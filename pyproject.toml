@@ -1,10 +1,9 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "setuptools_scm[toml]>=6.2"]
 build-backend = "hatchling.build"
 
 [project]
 name = "basebot22-basebot_JustinGuese"
-version = "0.0.1"
 authors = [
   { name="Justin Güse", email="guese.justin@gmail.com" },
 ]
@@ -24,3 +23,5 @@ dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools_scm]
