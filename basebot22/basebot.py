@@ -126,6 +126,12 @@ class BaseBot:
     def getDecision(self, row: pd.Series, ticker: str = "") -> int:
         # raise NotImplementedError("getDecision not implemented")
         return randint(-1, 1)
+    
+    def getEarnings(self, only_now = True):
+        response = get(self.backendurl + '/data/earnings-calendar?now=%s' % str(only_now).lower() , headers=self.headers)
+        if response.status_code != 200:
+            raise Exception("Error getting current earnings: ", response.text)
+        return response.json()
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
@@ -137,3 +143,5 @@ if __name__ == "__main__":
     bot.sell("AAPL", 1500, amountInUSD=True)
     print(bot.getPortfolio())
     print("portfolio worth is: %.2f dollars" % bot.getPortfolioWorth())
+    print("next earnings calendar events:")
+    print(bot.getEarnings(only_now=True))
