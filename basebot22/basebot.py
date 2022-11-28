@@ -1,8 +1,9 @@
 from datetime import date, datetime, timedelta
 from math import sqrt
+from random import randint
+from typing import List
 from urllib.parse import quote_plus
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from requests import get, post, put
@@ -37,29 +38,31 @@ class BaseBot:
         response = get(self.backendurl + '/bot/%s/portfolioworth' % quote_plus(self.name), headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error getting portfolio worth: ", response.text)
-        return response.json()["worth"]
-
-    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False):
+        return float(response.text)
+    
+    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False):
         params = {
             "botname": self.name,
             'ticker': ticker,
             'amount': amount,
             "amountInUSD": amountInUSD,
+            "short": short,
         }
         response = put(self.backendurl + '/buy/', params=params, headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error buying: ", response.text)
 
-    def sell(self, ticker: str, amount: float = -1, amountInUSD: bool = False):
+    def sell(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False):
         params = {
             "botname": self.name,
             'ticker': ticker,
             'amount': amount,
             "amountInUSD": amountInUSD,
+            "short": short,
         }
         response = put(self.backendurl + '/sell/', params=params, headers=self.headers)
         if response.status_code != 200:
-            raise Exception("Error selling: ", response.text)
+            raise Exception("Error selling: ", ticker, response.text)
 
     def getData(self, ticker: str, start_date: date = (datetime.utcnow() - timedelta(7)).date(), 
         end_date: date = datetime.utcnow().date(), technical_indicators: list = []):
@@ -75,13 +78,15 @@ class BaseBot:
         df = pd.DataFrame(response.json())
         df.set_index("timestamp", inplace=True)
         df.sort_index(inplace=True)
+        # somehow index gets converted to string
+        df.index = pd.to_datetime(df.index)
         # df = df[::-1]
         return df
     
     def getCurrentPrice(self, ticker: str):
         response = get(self.backendurl + '/data/current_price/' + quote_plus(ticker), headers=self.headers)
         if response.status_code != 200:
-            raise Exception("Error getting current price data: ", response.text)
+            raise Exception("Error getting current price data for %s: " % ticker, response.text)
         return float(response.text)
     
     def getTrend(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -98,15 +103,29 @@ class BaseBot:
         minima = argrelextrema(price.values, np.less)
         # convert that to a target variable
         signal = np.zeros(len(price))
-        lastSignal  = 0
+        ## if maxima contains the smallest i lastSignal is 1, else if minima contains the smallest i lastSignal is -1
+        min_min = min(minima[0])
+        min_max = min(maxima[0])
+        if min_min < min_max:
+            lastSignal = -1
+        elif min_min > min_max:
+            lastSignal = 1
+        else:
+            raise ValueError("minima and maxima are equal")
+        
         for i in range(len(price)):
             if i in maxima[0]:
                 lastSignal = -1
             elif i in minima[0]:
                 lastSignal = 1
             signal[i] = lastSignal
-        return signal
+        df["signal"] = signal
+        return df
         
+    ## basic backtest functionality
+    def getDecision(self, row: pd.Series, ticker: str = "") -> int:
+        # raise NotImplementedError("getDecision not implemented")
+        return randint(-1, 1)
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
