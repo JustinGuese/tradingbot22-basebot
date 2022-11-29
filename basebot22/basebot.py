@@ -122,6 +122,16 @@ class BaseBot:
         df["signal"] = signal
         return df
         
+    def __fixTimeStampEarnings(self, responses: list):
+        # fixing the timestamp field
+        if len(responses) == 0:
+            return responses
+        
+        # else
+        for i,d in enumerate(responses):
+            responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"])
+        return responses
+        
     ## basic backtest functionality
     def getDecision(self, row: pd.Series, ticker: str = "") -> int:
         # raise NotImplementedError("getDecision not implemented")
@@ -132,32 +142,28 @@ class BaseBot:
         if response.status_code != 200:
             raise Exception("Error getting current earnings: ", response.text)
         response = response.json()
-        response["timestamp"] = pd.to_datetime(response["timestamp"])
-        return response
+        return self.__fixTimeStampEarnings(response)
     
     def getEarningsFinancials(self, ticker: str, only_now: bool = True):
         response = get(self.backendurl + '/data/earnings/financials?ticker=%s&now=%s' % (ticker, str(only_now).lower()) , headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error getting current earnings financials: ", response.text)
         response = response.json()
-        response["timestamp"] = pd.to_datetime(response["timestamp"])
-        return response
+        return self.__fixTimeStampEarnings(response)
     
     def getEarningsEffect(self, ticker: str):
         response = get(self.backendurl + '/data/earnings/effect?ticker=%s' % (ticker) , headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error getting current earnings effects: ", response.text)
         response = response.json()
-        response["timestamp"] = pd.to_datetime(response["timestamp"])
-        return response
+        return self.__fixTimeStampEarnings(response)
     
     def updateEarnings(self, ticker: str):
         response = get(self.backendurl + '/update/earnings/?ticker=%s' % (ticker) , headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error getting current earnings effects: ", response.text)
         response = response.json()
-        response["timestamp"] = pd.to_datetime(response["timestamp"])
-        return response
+        return self.__fixTimeStampEarnings(response)
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
