@@ -144,6 +144,12 @@ class BaseBot:
         if response.status_code != 200:
             raise Exception("Error getting current earnings effects: ", response.text)
         return response.json()
+    
+    def updateEarnings(self, ticker: str):
+        response = get(self.backendurl + '/update/earnings/?ticker=%s' % (ticker) , headers=self.headers)
+        if response.status_code != 200:
+            raise Exception("Error getting current earnings effects: ", response.text)
+        return response.json()
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
