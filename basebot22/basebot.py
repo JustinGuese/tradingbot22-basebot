@@ -131,7 +131,7 @@ class BaseBot:
         
         # else
         for i,d in enumerate(responses):
-            responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"])
+            responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
         return responses
         
     ## basic backtest functionality
@@ -158,7 +158,10 @@ class BaseBot:
         if response.status_code != 200:
             raise Exception("Error getting current earnings effects: ", response.text)
         response = response.json()
-        return self.__fixTimeStampEarnings(response)
+        response = self.__fixTimeStampEarnings(response)
+        # next fix all_changes_list to str conversion
+        response["all_changes_list"] = list(response["all_changes_list"]) # becasue we save it in the db as str
+        return response
     
     def updateEarnings(self, ticker: str):
         response = get(self.backendurl + '/update/earnings/?ticker=%s' % (ticker) , headers=self.headers)
