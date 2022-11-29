@@ -123,6 +123,8 @@ class BaseBot:
         return df
         
     def __fixTimeStampEarnings(self, responses: list):
+        if responses is None:
+            return []
         # fixing the timestamp field
         if len(responses) == 0:
             return responses
