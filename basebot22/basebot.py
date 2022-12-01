@@ -136,8 +136,7 @@ class BaseBot:
             try:
                 responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
             except KeyError as e:
-                print("keyerror with fix timestamp: ", str(responses))
-                raise
+                pass
         return responses
         
     ## basic backtest functionality
