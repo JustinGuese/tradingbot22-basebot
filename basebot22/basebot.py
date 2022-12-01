@@ -130,7 +130,9 @@ class BaseBot:
             return responses
         
         # else
-        assert isinstance(responses, list) # idk why i need to do this again...
+        if not isinstance(responses, list): # idk why i need to do this again...
+            print("not a list" , responses)
+            raise ValueError("responses is not a list: " + str(responses))
         for i,d in enumerate(responses):
             try:
                 responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
