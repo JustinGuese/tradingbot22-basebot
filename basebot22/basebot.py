@@ -156,6 +156,9 @@ class BaseBot:
         response = response.json()
         return self.__fixTimeStampEarnings(response)
     
+    def __decryptStringArray(stringarray: str) -> list:
+        return [s.strip() for s in stringarray[1:-1].split(",")]
+    
     def getEarningsEffect(self, ticker: str):
         response = get(self.backendurl + '/data/earnings/effect?ticker=%s' % (ticker) , headers=self.headers)
         if response.status_code != 200:
@@ -163,7 +166,7 @@ class BaseBot:
         response = response.json()
         response = self.__fixTimeStampEarnings(response)
         # next fix all_changes_list to str conversion
-        response["all_changes_list"] = list(response["all_changes_list"]) # becasue we save it in the db as str
+        response["all_changes_list"] = self.__decryptStringArray(response["all_changes_list"]) # becasue we save it in the db as str
         return response
     
     def updateEarnings(self, ticker: str):
