@@ -135,7 +135,7 @@ class BaseBot:
         for i in range(len(responses)):
             try:
                 responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
-            except KeyError as e:
+            except Exception:
                 pass
         return responses
         
