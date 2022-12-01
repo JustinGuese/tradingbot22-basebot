@@ -130,8 +130,13 @@ class BaseBot:
             return responses
         
         # else
+        assert isinstance(responses, list) # idk why i need to do this again...
         for i,d in enumerate(responses):
-            responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
+            try:
+                responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
+            except KeyError as e:
+                print("keyerror with fix timestamp: ", str(responses))
+                raise
         return responses
         
     ## basic backtest functionality
@@ -182,3 +187,4 @@ if __name__ == "__main__":
     print("portfolio worth is: %.2f dollars" % bot.getPortfolioWorth())
     print("next earnings calendar events:")
     print(bot.getEarnings(only_now=True))
+
