@@ -156,7 +156,7 @@ class BaseBot:
         response = response.json()
         return self.__fixTimeStampEarnings(response)
     
-    def __decryptStringArray(stringarray: str) -> list:
+    def __decryptStringArray(self, stringarray: str) -> list:
         return [s.strip() for s in stringarray[1:-1].split(",")]
     
     def getEarningsEffect(self, ticker: str):
