@@ -130,8 +130,6 @@ class BaseBot:
             return responses
         
         # else
-        if not isinstance(responses, dict): # idk why i need to do this again...
-            responses = [responses] # idk why it comes to this
         for i in range(len(responses)):
             try:
                 responses[i]["timestamp"] = pd.to_datetime(responses[i]["timestamp"]).date()
