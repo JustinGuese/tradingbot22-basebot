@@ -1,6 +1,5 @@
 [build-system]
-requires = ["hatchling", "setuptools_scm[toml]>=6.2"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
 
 [project]
 name = "basebot22-basebot_JustinGuese"
