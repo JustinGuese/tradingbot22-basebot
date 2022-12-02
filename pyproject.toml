@@ -27,3 +27,4 @@ dependencies = [
 
 
 [tool.setuptools_scm]
+local_scheme = "no-local-version"
