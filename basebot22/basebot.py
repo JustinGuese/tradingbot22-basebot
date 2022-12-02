@@ -149,6 +149,13 @@ class BaseBot:
         response = response.json()
         return self.__fixTimeStampEarnings(response)
     
+    def getEarningsCalendarPrevious(self, custom_date: date = date.today()):
+        response = get(self.backendurl + '/data/earnings/calendar-previous?custom_date=' % (custom_date.strftime("%Y-%m-%d")) , headers=self.headers)
+        if response.status_code != 200:
+            raise Exception("Error getting current earnings financials: ", response.text)
+        response = response.json()
+        return self.__fixTimeStampEarnings(response)
+    
     def getEarningsFinancials(self, ticker: str, only_now: bool = True):
         response = get(self.backendurl + '/data/earnings/financials?ticker=%s&now=%s' % (ticker, str(only_now).lower()) , headers=self.headers)
         if response.status_code != 200:
