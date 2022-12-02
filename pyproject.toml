@@ -27,4 +27,3 @@ install_requires = [
 
 
 [tool.setuptools_scm]
-write_to = "pkg/_version.py"
