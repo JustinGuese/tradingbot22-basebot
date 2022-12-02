@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=60", "setuptools_scm[toml]>=6.4"]
+requires = ["setuptools>=60"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +9,7 @@ authors = [
 ]
 description = "A python package to interact with the tradingbot22 backend. used in tradingbot22-tradingbots"
 readme = "README.md"
-# version = "0.2.5.2"
-dynamic = ["version"]
+version = "VERSION"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -25,9 +24,3 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/JustinGuese/tradingbot22-basebot"
 "Bug Tracker" = "https://github.com/JustinGuese/tradingbot22-basebot/issues"
-
-
-[tool.setuptools_scm]
-# local_scheme = "no-local-version"
-write_to = "basebot22/_version.py"
-version_scheme = "release-branch-semver"
