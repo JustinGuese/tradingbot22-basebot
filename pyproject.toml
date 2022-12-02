@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=60", "setuptools_scm[toml]>=6.4"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "basebot22-basebot_JustinGuese"
@@ -28,3 +29,4 @@ dependencies = [
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
+write_to = "basebot22/_version.py"
