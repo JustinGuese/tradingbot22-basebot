@@ -151,7 +151,7 @@ class BaseBot:
     
     def getEarningsCalendarPrevious(self, custom_date: date = date.today()):
         try:
-            response = get(self.backendurl + '/data/earnings/calendar-previous?custom_date=' % (custom_date.strftime("%Y-%m-%d")) , headers=self.headers)
+            response = get(self.backendurl + '/data/earnings/calendar-previous?custom_date=%s' % (custom_date.strftime("%Y-%m-%d")) , headers=self.headers)
         except TypeError as e:
             # not all fuck formatted during string formatting wtf
             raise TypeError("custom_date must be formattable by strftime(Y-m-d), it is: %s" % str(custom_date)) from e
