@@ -1,3 +1,7 @@
+[![Upload Python Package](https://github.com/JustinGuese/tradingbot22-basebot/actions/workflows/main.yaml/badge.svg)](https://github.com/JustinGuese/tradingbot22-basebot/actions/workflows/main.yaml)
+
+Published on: https://pypi.org/project/basebot22-basebot-JustinGuese/
+
 # tradingbot22-basebot
 
 python package to interact with the [tradingbot22-backend](https://github.com/JustinGuese/tradingbot22-backend), used in [tradingbot22-tradingbots](https://github.com/JustinGuese/tradingbot22-tradingbots)
