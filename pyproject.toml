@@ -28,6 +28,6 @@ dependencies = [
 
 
 [tool.setuptools_scm]
-local_scheme = "no-local-version"
+# local_scheme = "no-local-version"
 write_to = "basebot22/_version.py"
 version_scheme = "release-branch-semver"
