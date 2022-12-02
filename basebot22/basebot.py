@@ -40,17 +40,36 @@ class BaseBot:
             raise Exception("Error getting portfolio worth: ", response.text)
         return float(response.text)
     
-    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False):
-        params = {
-            "botname": self.name,
-            'ticker': ticker,
-            'amount': amount,
-            "amountInUSD": amountInUSD,
-            "short": short,
-        }
-        response = put(self.backendurl + '/buy/', params=params, headers=self.headers)
-        if response.status_code != 200:
-            raise Exception("Error buying: ", response.text)
+    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False, close_if_below: float = -1, close_if_above: float = -1):
+        if close_if_above == -1 and close_if_below == -1:
+            # normal trade
+            params = {
+                "botname": self.name,
+                'ticker': ticker,
+                'amount': amount,
+                "amountInUSD": amountInUSD,
+                "short": short,
+            }
+            response = put(self.backendurl + '/buy/', params=params, headers=self.headers)
+            if response.status_code != 200:
+                raise Exception("Error buying: ", response.text)
+        elif close_if_above != -1 and close_if_below != -1:
+            # stoploss trade
+            params = {
+                "botname": self.name,
+                'ticker': ticker,
+                'amount': amount,
+                "amountInUSD": amountInUSD,
+                "short": short,
+                # stop loss specific stuff
+                "close_if_above": close_if_above,
+                "close_if_below": close_if_below,
+            }
+            response = put(self.backendurl + '/buy/stoploss/', params=params, headers=self.headers)
+            if response.status_code != 200:
+                raise Exception("Error stoploss buying: ", response.text)
+        else:
+            raise ValueError("close_if_above and close_if_below must be both set or both not set. if they are both set a stop loss / take profit trade is created")
 
     def sell(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False):
         params = {
