@@ -150,7 +150,11 @@ class BaseBot:
         return self.__fixTimeStampEarnings(response)
     
     def getEarningsCalendarPrevious(self, custom_date: date = date.today()):
-        response = get(self.backendurl + '/data/earnings/calendar-previous?custom_date=' % (custom_date.strftime("%Y-%m-%d")) , headers=self.headers)
+        try:
+            response = get(self.backendurl + '/data/earnings/calendar-previous?custom_date=' % (custom_date.strftime("%Y-%m-%d")) , headers=self.headers)
+        except TypeError as e:
+            # not all fuck formatted during string formatting wtf
+            raise TypeError("custom_date must be formattable by strftime(Y-m-d), it is: %s" % str(custom_date)) from e
         if response.status_code != 200:
             raise Exception("Error getting current earnings financials: ", response.text)
         response = response.json()
