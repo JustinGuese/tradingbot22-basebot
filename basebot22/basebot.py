@@ -206,6 +206,14 @@ class BaseBot:
             raise Exception("Error getting current earnings effects: ", response.text)
         response = response.json()
         return self.__fixTimeStampEarnings(response)
+    
+    def getEarningsRatings(self, ticker: str) -> dict:
+        response = get(self.backendurl + '/data/earnings/ratings/?ticker=%s' % (ticker) , headers=self.headers)
+        if response.status_code != 200:
+            raise Exception("Error getting earnings ratings: ", response.text)
+        response = response.json()
+        response["timestamp"] = pd.to_datetime(response["timestamp"])
+        return response
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
@@ -217,6 +225,7 @@ if __name__ == "__main__":
     bot.sell("AAPL", 1500, amountInUSD=True)
     print(bot.getPortfolio())
     print("portfolio worth is: %.2f dollars" % bot.getPortfolioWorth())
-    print("next earnings calendar events:")
-    print(bot.getEarnings(only_now=True))
+    print("current earnings ratings for msft:")
+    # print(bot.getEarnings(only_now=True))
+    print(bot.getEarningsRatings("MSFT"))
 
