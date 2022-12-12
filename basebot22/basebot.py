@@ -40,7 +40,7 @@ class BaseBot:
             raise Exception("Error getting portfolio worth: ", response.text)
         return float(response.text)
     
-    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False, close_if_below: float = -1, close_if_above: float = -1, maximum_date: date = None):
+    def buy(self, ticker: str, amount: float = -1, amountInUSD: bool = False, short: bool = False, close_if_below: float = -1, close_if_above: float = -1, close_if_below_hardlimit: float = None, maximum_date: date = None):
         if close_if_above == -1 and close_if_below == -1 and maximum_date is None:
             # normal trade
             params = {
@@ -64,6 +64,7 @@ class BaseBot:
                 # stop loss specific stuff
                 "close_if_above": close_if_above,
                 "close_if_below": close_if_below,
+                "close_if_below_hardlimit" : close_if_below_hardlimit,
                 "maximum_date": maximum_date.strftime("%Y-%m-%d"),
             }
             response = put(self.backendurl + '/buy/stoploss/', params=params, headers=self.headers)
