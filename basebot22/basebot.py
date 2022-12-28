@@ -128,7 +128,7 @@ class BaseBot:
         signal = []
         # we need an initial guess at the breakpoints, so 
         num_breakpoints = 0
-        minimumDistance = len(df) / 10 # trial and error value
+        minimumDistance = len(df) / 15 # trial and error value
         crntDistance = 0
         # set last signal
         min_min = min(minima)
