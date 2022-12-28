@@ -7,7 +7,7 @@ from urllib.parse import quote_plus
 import numpy as np
 import pandas as pd
 from requests import get, post, put
-from scipy.signal import argrelextrema
+from scipy.signal import argrelextrema, savgol_filter
 
 
 class BaseBot:
@@ -111,35 +111,51 @@ class BaseBot:
         return float(response.text)
     
     def getTrend(self, df: pd.DataFrame) -> pd.DataFrame:
+        # see tradingbot22-tradingbots/jupyternotebooks/signalsmoothing.ipynb
         if "adj_close" not in df:
             raise ValueError("adj_close not in dataframe: " + str(df.columns))
         price = df["adj_close"]
-        # moving average
-        price = price.rolling(window=20).mean()
-        price = price.fillna(method='bfill')
-        # for local maxima
-        maxima = argrelextrema(price.values, np.greater)
-
-        # for local minima
-        minima = argrelextrema(price.values, np.less)
-        # convert that to a target variable
-        signal = np.zeros(len(price))
-        ## if maxima contains the smallest i lastSignal is 1, else if minima contains the smallest i lastSignal is -1
-        min_min = min(minima[0])
-        min_max = min(maxima[0])
+        
+        windowsize = int(len(df) / 5) # 151 turned out to be quite good
+        yhat = savgol_filter(price, windowsize, 3) # window size 51, polynomial order 3
+        ## get minima maxima,
+        maxima = argrelextrema(yhat, np.greater)[0]
+        minima = argrelextrema(yhat, np.less)[0]
+        
+        # calculate the signal, taking into account minimum distances to ignore changes that are tiny
+        newMinima = []
+        newMaxima = []
+        signal = []
+        # we need an initial guess at the breakpoints, so 
+        num_breakpoints = 0
+        minimumDistance = len(df) / 10 # trial and error value
+        crntDistance = 0
+        # set last signal
+        min_min = min(minima)
+        min_max = min(maxima)
         if min_min < min_max:
             lastSignal = -1
         elif min_min > min_max:
             lastSignal = 1
-        else:
-            raise ValueError("minima and maxima are equal")
+            
+        for i in range(len(df)):
+            if (i in minima or i in maxima) and crntDistance > minimumDistance:
+                if i in minima and lastSignal == -1:
+                    newMinima.append(i)
+                    lastSignal = 1 # because we have been at minima, moving to maxima
+                    num_breakpoints += 1
+                    crntDistance = 0
+                elif i in maxima and lastSignal == 1:
+                    newMaxima.append(i)
+                    lastSignal = -1 # because we have been at maxima, moving to minima
+                    num_breakpoints += 1
+                    crntDistance = 0
+                    
+            crntDistance += 1
+            signal.append(lastSignal)
+            
+        assert num_breakpoints > 2, "Not enough breakpoints found: %d" % num_breakpoints
         
-        for i in range(len(price)):
-            if i in maxima[0]:
-                lastSignal = -1
-            elif i in minima[0]:
-                lastSignal = 1
-            signal[i] = lastSignal
         df["signal"] = signal
         return df
         
