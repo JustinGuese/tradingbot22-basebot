@@ -53,7 +53,7 @@ class BaseBot:
             response = put(self.backendurl + '/buy/', params=params, headers=self.headers)
             if response.status_code != 200:
                 raise Exception("Error buying: ", response.text)
-        elif close_if_above != -1 and close_if_below != -1 and maximum_date is not None:
+        elif close_if_above != -1 and close_if_below != -1:
             # stoploss trade
             params = {
                 "botname": self.name,
