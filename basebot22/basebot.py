@@ -54,6 +54,8 @@ class BaseBot:
             if response.status_code != 200:
                 raise Exception("Error buying: ", response.text)
         elif close_if_above != -1 and close_if_below != -1:
+            if maximum_date is None:
+                maximum_date = datetime.utcnow().date() + timedelta(365)
             # stoploss trade
             params = {
                 "botname": self.name,
