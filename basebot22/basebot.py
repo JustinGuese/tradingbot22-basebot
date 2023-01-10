@@ -67,7 +67,7 @@ class BaseBot:
                 "close_if_above": close_if_above,
                 "close_if_below": close_if_below,
                 "close_if_below_hardlimit" : close_if_below_hardlimit,
-                "maximum_date": datetime.from_date(maximum_date).isoformat(),
+                "maximum_date": datetime.combine(maximum_date, datetime.time.min), # man...
             }
             response = put(self.backendurl + '/buy/stoploss/', params=params, headers=self.headers)
             if response.status_code != 200:
