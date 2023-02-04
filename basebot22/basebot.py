@@ -12,18 +12,20 @@ from scipy.signal import argrelextrema, savgol_filter
 
 class BaseBot:
 
-    def __init__(self, name: str, backendurl: str = "http://127.0.0.1:8000"):
+    def __init__(self, name: str, backendurl: str = "http://127.0.0.1:8000", live: bool = False):
         self.backendurl: str = backendurl
         self.headers: dict = { 'accept': 'application/json', 'Content-Type': 'application/json'}
-        self.name: str = self.checkOrCreate(name)
+        self.live: bool = live
+        self.name: str = self.checkOrCreate(name, live)
     
-    def checkOrCreate(self, name: str) -> str:
+    def checkOrCreate(self, name: str, live: bool = False) -> str:
         response = get(self.backendurl + '/bot/' + quote_plus(name), headers=self.headers)
         if response.status_code != 200:
             # create
             json_data = {
                 'name': name,
                 'description': 'created in basebot',
+                'live': live,
             }
             response = put(self.backendurl + "/bot", json=json_data, headers=self.headers)
         return name
