@@ -235,6 +235,47 @@ class BaseBot:
         response = response.json()
         response["timestamp"] = pd.to_datetime(response["timestamp"])
         return response
+    
+        
+    def backtest(self, df: pd.DataFrame, signalLookback: int = 0, startMoney: int = 10000):
+        # expects a pandas dataframe containing close column and a signal column
+        assert "close" in df, "close column not in dataframe"
+        assert "signal" in df, "signal column not in dataframe"
+        # assert for signal column that it only contains -1, 0, 1
+        assert df["signal"].isin([-1, 0, 1]).all(), "signal column contains values other than -1, 0, 1"
+
+        # now we can start
+        money = startMoney
+        shares = 0
+        portfolio = []
+        boughtAt = None
+        trades = []
+        backtestNrStocks = startMoney / df.iloc[0]["close"]
+        backtest = []
+
+        for i in range(signalLookback, len(df)):
+            decision = df.iloc[i-signalLookback:i]["signal"].median()
+            if decision == 1 and shares == 0:
+                # buy
+                howMany = money / df.iloc[i]["close"]
+                shares += howMany
+                money -= howMany * df.iloc[i]["close"]
+                boughtAt = df.iloc[i]["close"] * howMany
+            elif decision == -1 and shares > 0:
+                # sell
+                win = shares * df.iloc[i]["close"]
+                money += win
+                shares = 0
+                trades.append(win-boughtAt)
+            portfolio.append(money + shares * df.iloc[i]["close"])
+            backtest.append(backtestNrStocks * df.iloc[i]["close"])
+        # last day sell all
+        if shares > 0:
+            win = shares * df.iloc[i]["close"]
+            money += win
+            shares = 0
+            trades.append(win-boughtAt)
+        return portfolio[-1], backtest[-1], portfolio, backtest, trades
 
 if __name__ == "__main__":
     bot = BaseBot("testbot")
