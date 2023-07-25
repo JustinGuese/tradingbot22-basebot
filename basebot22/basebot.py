@@ -27,7 +27,7 @@ class BaseBot:
         self.name: str = self.checkOrCreate(name, live)
     
     def checkOrCreate(self, name: str, live: bool = False) -> str:
-        response = get(self.backendurl + '/bot/' + quote_plus(name), headers=self.headers)
+        response = self.session.get(self.backendurl + '/bot/' + quote_plus(name), headers=self.headers)
         if response.status_code != 200:
             # create
             json_data = {
