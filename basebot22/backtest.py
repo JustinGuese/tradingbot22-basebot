@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -78,8 +78,21 @@ class Backtest:
                 worth += amount * (self.boughtAt[ticker] - crntRow[ticker]["Close"]) + amount * self.boughtAt[ticker]
         return worth
     
-    def oneRun(self) -> List[float]:
+    def getWorthOfBaseline(self, baselineAmounts, crntRow):
+        worth = 0
+        for ticker, amount in baselineAmounts.items():
+            if ticker == "USD":
+                worth += amount
+                continue
+            worth += amount * crntRow[ticker]["Close"]
+        return worth
+    
+    def oneRun(self) -> Tuple[List[float], List[float]]:
         portfolio = []
+        baseline = []
+        baselineAmounts = {}
+        for stockname in self.data.keys():
+            baselineAmounts[stockname] = self.startMoney / len(self.data.keys()) / self.data[stockname].iloc[0]["Close"]
         for date in self.data[list(self.data.keys())[0]].index:
             crntRow = {}
             for stockname in self.data.keys():
@@ -117,7 +130,7 @@ class Backtest:
                         self.fees += fees
                         self.portfolio["USD"] += amount - fees
                         self.portfolio[order.stockname] = 0
-                    elif self.portfolio.get(order.stockname,0) == 0 and order.amount < 0:
+                    elif self.portfolio.get(order.stockname,0) == 0 and order.amountInUSD < 0:
                         # short
                         if order.amountInUSD == -1:
                             # all we have
@@ -139,18 +152,45 @@ class Backtest:
                         raise ValueError("this combination should not be allowed!!!")
                 self.portfolioWorth = self.getValueOfPortfolio(crntRow)
                 portfolio.append(self.portfolioWorth)
-        return portfolio
+                baseline.append(self.getWorthOfBaseline(baselineAmounts, crntRow))
+        return portfolio, baseline
 
 
 if __name__ == "__main__":
-    def callback(row, all_data, portfolio, portfolioWorth):
-        if row["SMA50"] > row["SMA200"] and portfolio.get("AAPL", 0) == 0:
-            return [Order(buy = True, stockname="AAPL")] # if sma cross buy all
-        elif row["SMA50"] < row["SMA200"] and portfolio.get("AAPL", 0) > 0:
-            return [Order(buy = False, stockname="AAPL")] # sell all if sma cross down
-        return []
 
-    bt = Backtest(["AAPL"], callback)
-    portfolio = bt.oneRun()
-    print(portfolio[-1])
-    plt.plot(portfolio)
+    startPriceDiff = 15.05
+    def decisionFunction(row, all_data, portfolio, portfolioWorth):
+        crntDiff = row["RWL"]["Adj Close"] - row["FNDX"]["Adj Close"]
+        orders = []
+        if crntDiff > startPriceDiff * 1.2:
+            print(f"the price difference is bigger {crntDiff} and the start price difference is {startPriceDiff}")
+            for ticker, amount in portfolio.items():
+                if ticker == "USD": 
+                    continue
+                if amount != 0:
+                    # sell short, or sell long
+                    orders.append(Order(buy=False, stockname=ticker, amount=-1))
+            # then proceed to buy
+            # they are going away from each other, short top one, long bottom one
+            print("they are extending, short top one, long bottom one")
+            orders.append(Order(buy=False, stockname="RWL", amount=-portfolioWorth/2))
+            orders.append(Order(buy=True, stockname="FNDX", amount=portfolioWorth/2))
+        elif crntDiff < startPriceDiff * 0.8:
+            # they are going clother together
+            print(f"the price difference is smaller {crntDiff} and the start price difference is {startPriceDiff}")
+            for ticker, amount in portfolio.items():
+                if ticker == "USD": 
+                    continue
+                if amount != 0:
+                    # sell short, or sell long
+                    orders.append(Order(buy=False, stockname=ticker, amount=-1))
+            # then proceed to buy
+            print("they are going closer, long top one, short bottom one")
+            orders.append(Order(buy=True, stockname="RWL", amount=portfolioWorth/2))
+            orders.append(Order(buy=False, stockname="FNDX", amount=-portfolioWorth/2))
+        return orders
+
+    bt = Backtest(["RWL", "FNDX"], decisionFunction)
+    portfolio, baseline = bt.oneRun()
+    print("win: ", portfolio[-1] - portfolio[0])
+    print(f"just buy and hold would have given you: ", baseline[-1] - baseline[0])
