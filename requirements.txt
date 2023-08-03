@@ -3,3 +3,5 @@ tqdm
 pandas
 scipy
 sklearn
+ta
+yfinance
