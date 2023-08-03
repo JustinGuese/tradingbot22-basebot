@@ -42,7 +42,10 @@ class BaseBot:
         response = self.session.get(self.backendurl + '/bot/' + quote_plus(self.name), headers=self.headers)
         if response.status_code != 200:
             raise Exception("Error getting portfolio: ", response.text)
-        return response.json()["portfolio"]
+        portfolio = response.json()["portfolio"]
+        # only keep portfolio values that are not 0
+        portfolio = {k: v for k, v in portfolio.items() if v != 0}
+        return portfolio
 
     def getPortfolioWorth(self) -> float:
         response = self.session.get(self.backendurl + '/bot/%s/portfolioworth' % quote_plus(self.name), headers=self.headers)
