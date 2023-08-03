@@ -65,7 +65,7 @@ class Backtest:
         self.fees = 0.
         self.boughtAt = {}
 
-    def getValueOfPortfolio(self, crntRow, boughtAt):
+    def getValueOfPortfolio(self, crntRow):
         worth = 0
         for ticker, amount in self.portfolio.items():
             if ticker == "USD":
@@ -74,7 +74,7 @@ class Backtest:
             if amount > 0:
                 worth += amount * crntRow[ticker]["Close"]
             elif amount < 0:
-                worth += amount * (boughtAt[ticker] - crntRow[ticker]["Close"]) + amount * boughtAt[ticker]
+                worth += amount * (self.boughtAt[ticker] - crntRow[ticker]["Close"]) + amount * self.boughtAt[ticker]
         return worth
     
     def oneRun(self):
@@ -136,13 +136,12 @@ class Backtest:
                         self.portfolio[order.stockname] = 0
                     else:
                         raise ValueError("this combination should not be allowed!!!")
-                portfolio.append(self.getValueOfPortfolio(crntRow, self.boughtAt))
+                portfolio.append(self.getValueOfPortfolio(crntRow))
         return portfolio
 
 
 if __name__ == "__main__":
     def callback(row, all_data, portfolio):
-        medVolume = all_data["Volume"].median()
         if row["SMA50"] > row["SMA200"] and portfolio.get("AAPL", 0) == 0:
             return [Order(buy = True, stockname="AAPL")] # if sma cross buy all
         elif row["SMA50"] < row["SMA200"] and portfolio.get("AAPL", 0) > 0:
