@@ -91,7 +91,7 @@ class Backtest:
                 # simple mode
                 crntRowSub = crntRow[list(crntRow.keys())[0]]
                 datasSub = self.datas[list(self.datas.keys())[0]]
-            decisions: List[Order] = self.decisionFunction(crntRowSub, datasSub, self.portfolio)
+            decisions: List[Order] = self.decisionFunction(crntRowSub, datasSub, self.portfolio, self.portfolioWorth)
             assert isinstance(decisions, list), "Decision function must return a list of orders or empty list"
             
             for order in decisions:
@@ -143,7 +143,7 @@ class Backtest:
 
 
 if __name__ == "__main__":
-    def callback(row, all_data, portfolio):
+    def callback(row, all_data, portfolio, portfolioWorth):
         if row["SMA50"] > row["SMA200"] and portfolio.get("AAPL", 0) == 0:
             return [Order(buy = True, stockname="AAPL")] # if sma cross buy all
         elif row["SMA50"] < row["SMA200"] and portfolio.get("AAPL", 0) > 0:
