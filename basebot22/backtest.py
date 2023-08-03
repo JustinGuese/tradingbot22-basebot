@@ -113,6 +113,8 @@ class Backtest:
                     if order.amountInUSD == -1:
                         # all we have
                         amount = self.portfolio["USD"]
+                    else:
+                        amount = order.amountInUSD
                     fees = amount * self.commission
                     self.fees += fees
                     howMany = (amount - fees) / crntRow[order.stockname]["Close"]
@@ -125,6 +127,8 @@ class Backtest:
                         if order.amountInUSD == -1:
                             # all we have
                             amount = self.portfolio.get(order.stockname) * crntRow[order.stockname]["Close"]
+                        else:
+                            amount = order.amountInUSD
                         # sell regular
                         fees = amount * self.commission
                         self.fees += fees
@@ -135,6 +139,8 @@ class Backtest:
                         if order.amountInUSD == -1:
                             # all we have
                             amount = self.portfolio["USD"]
+                        else:
+                            amount = order.amountInUSD
                         self.boughtAt[order.stockname] = crntRow[order.stockname]["Close"]
                         fees = amount * self.commission
                         self.fees += fees
