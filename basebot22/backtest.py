@@ -43,18 +43,6 @@ class Order(BaseModel):
     stockname: str
     amountInUSD: float = -1 # 1 means all
 
-def getValueOfPortfolio(crntRow, portfolio, boughtAt):
-    worth = 0
-    for ticker, amount in portfolio.items():
-        if ticker == "USD":
-            worth += amount
-            continue
-        if amount > 0:
-            worth += amount * crntRow[ticker]["Close"]
-        elif amount < 0:
-            worth += amount * (boughtAt[ticker] - crntRow[ticker]["Close"]) + amount * boughtAt[ticker]
-    return worth
-
 class Backtest:
     def __init__(self, stocknames: List[str], decisionFunction, startMoney: int = 10000, interval: Interval = Interval.ONE_DAY, period: Period = Period.THREE_YEARS):
         assert len(stocknames) > 0, "Stocknames must be a list of stock names"
@@ -76,9 +64,19 @@ class Backtest:
         self.commission = 0.005 # 0.5% commission
         self.fees = 0.
         self.boughtAt = {}
+        self.portfolioWorth = self.portfolio["USD"]
 
     def getValueOfPortfolio(self, crntRow):
-        return getValueOfPortfolio(crntRow, self.portfolio, self.boughtAt)
+        worth = 0
+        for ticker, amount in self.portfolio.items():
+            if ticker == "USD":
+                worth += amount
+                continue
+            if amount > 0:
+                worth += amount * crntRow[ticker]["Close"]
+            elif amount < 0:
+                worth += amount * (self.boughtAt[ticker] - crntRow[ticker]["Close"]) + amount * self.boughtAt[ticker]
+        return worth
     
     def oneRun(self) -> List[float]:
         portfolio = []
@@ -139,7 +137,8 @@ class Backtest:
                         self.portfolio[order.stockname] = 0
                     else:
                         raise ValueError("this combination should not be allowed!!!")
-                portfolio.append(self.getValueOfPortfolio(crntRow))
+                self.portfolioWorth = self.getValueOfPortfolio(crntRow)
+                portfolio.append(self.portfolioWorth)
         return portfolio
 
 
