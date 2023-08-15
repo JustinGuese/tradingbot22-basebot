@@ -45,6 +45,8 @@ class BaseBot:
         portfolio = response.json()["portfolio"]
         # only keep portfolio values that are not 0
         portfolio = {k: v for k, v in portfolio.items() if v != 0}
+        if "USD" not in portfolio:
+            portfolio["USD"] = 0
         return portfolio
 
     def getPortfolioWorth(self) -> float:
