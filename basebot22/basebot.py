@@ -32,7 +32,7 @@ class BaseBot:
 
     def checkOrCreate(self, name: str, live: bool = False) -> str:
         response = self.session.get(
-            self.backendurl + "/bot/" + quote_plus(name), headers=self.headers
+            self.backendurl + "/bots/" + quote_plus(name), headers=self.headers
         )
         if response.status_code != 200:
             # create
