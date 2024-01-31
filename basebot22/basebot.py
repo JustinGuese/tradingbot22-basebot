@@ -73,7 +73,7 @@ class BaseBot:
     def buy(
         self,
         ticker: str,
-        amount: float = -1,
+        amount: float = 0,
         amountInUSD: bool = True,
         short: bool = False,
     ):
@@ -95,7 +95,7 @@ class BaseBot:
     def sell(
         self,
         ticker: str,
-        amount: float = -1,
+        amount: float = 0,
         amountInUSD: bool = True,
         short: bool = False,
     ):
