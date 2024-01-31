@@ -112,7 +112,7 @@ class BaseBot:
             params=params,
         )
         if response.status_code != 200:
-            raise Exception("Error selling: ", ticker, response.text)
+            raise Exception("Error selling %s of %s " % (str(amount), ticker), response.text)
 
     def getCurrentPrice(self, ticker: str):
         response = self.session.get(
