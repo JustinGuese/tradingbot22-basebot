@@ -30,7 +30,9 @@ class BaseBot:
         self.live: bool = live
         self.name: str = self.checkOrCreate(name, live)
 
-    def checkOrCreate(self, name: str, live: bool = False) -> str:
+    def checkOrCreate(self, name: str, live: bool = False, nicename: str = None) -> str:
+        if nicename is None:
+            nicename = name
         response = self.session.get(
             self.backendurl + "/bots/" + quote_plus(name), headers=self.headers
         )
@@ -38,6 +40,7 @@ class BaseBot:
             # create
             json_data = {
                 "name": name,
+                "nicename" : name,
                 "description": "created in basebot",
                 "portfolio": {"USD": 10000},
                 "live": live,
@@ -79,6 +82,8 @@ class BaseBot:
     ):
         if short:
             raise NotImplementedError("Shorting not implemented")
+        if amount < 0:
+            raise ValueError("amount must be positive")
         params = {}
         if not amountInUSD:
             params["amountInUSD"] = False
@@ -101,6 +106,8 @@ class BaseBot:
     ):
         if short:
             raise NotImplementedError("Shorting not implemented")
+        if amount < 0:
+            raise ValueError("Amount must be positive")
         params = {}
         if not amountInUSD:
             params["amountInUSD"] = False
